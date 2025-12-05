@@ -41,15 +41,15 @@ export const MyAppealsTab: React.FC<MyAppealsTabProps> = ({
     <div className="space-y-6">
       {meStudent && (
         <div className={cx('rounded-xl shadow-md p-6', darkMode ? 'bg-gray-800' : 'bg-white')}>
-          <h3 className="text-lg font-semibold mb-4">ยื่นอุทธรณ์/แนบหลักฐาน</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">ยื่นอุทธรณ์/แนบหลักฐาน</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1">เลือกรายการความผิด</label>
+              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">เลือกรายการความผิด</label>
               <select
                 value={selected}
                 onChange={(e) => setSelected(e.target.value)}
-                className="w-full border rounded-md px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-indigo-400 outline-none"
+                className="w-full border rounded-md px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-400 outline-none"
               >
                 <option value="">-- เลือกรายการ --</option>
                 {myViolations.filter(v => !(v.appeals && v.appeals.length > 0)).map((v) => (
@@ -60,10 +60,10 @@ export const MyAppealsTab: React.FC<MyAppealsTabProps> = ({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">แนบรูปหลักฐาน (ไม่บังคับ)</label>
+              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">แนบรูปหลักฐาน (ไม่บังคับ)</label>
               <label className="flex items-center gap-2 px-3 py-2 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 w-fit">
                 <Image className="w-5 h-5" />
-                <span>เลือกไฟล์/เปิดกล้อง</span>
+                <span className="text-gray-700 dark:text-gray-300">เลือกไฟล์/เปิดกล้อง</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -100,7 +100,7 @@ export const MyAppealsTab: React.FC<MyAppealsTabProps> = ({
       )}
 
       <div className={cx('rounded-xl shadow-md p-6', darkMode ? 'bg-gray-800' : 'bg-white')}>
-        <h3 className="text-lg font-semibold mb-4">สถานะคำร้องของฉัน</h3>
+        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">สถานะคำร้องของฉัน</h3>
         {myAppeals.length === 0 ? (
           <p className="text-gray-500">ยังไม่มีคำร้อง</p>
         ) : (
@@ -115,12 +115,12 @@ export const MyAppealsTab: React.FC<MyAppealsTabProps> = ({
                       ? 'border-yellow-700 bg-yellow-900/20'
                       : 'border-yellow-300 bg-yellow-50'
                     : a.status === 'approved'
-                    ? darkMode
-                      ? 'border-green-700 bg-green-900/20'
-                      : 'border-green-300 bg-green-50'
-                    : darkMode
-                    ? 'border-red-700 bg-red-900/20'
-                    : 'border-red-300 bg-red-50'
+                      ? darkMode
+                        ? 'border-green-700 bg-green-900/20'
+                        : 'border-green-300 bg-green-50'
+                      : darkMode
+                        ? 'border-red-700 bg-red-900/20'
+                        : 'border-red-300 bg-red-50'
                 )}
               >
                 <div className="flex justify-between gap-3">
@@ -128,13 +128,13 @@ export const MyAppealsTab: React.FC<MyAppealsTabProps> = ({
                     <p className="text-sm">
                       ความผิด: <span className="font-medium">{a._vType}</span>
                     </p>
-                    <p className="mt-1">{a.message}</p>
+                    <p className="mt-1 text-gray-800 dark:text-white">{a.message}</p>
                     {a.image && <img src={a.image} className="h-20 mt-2 rounded border object-cover" alt="evidence" />}
                     <p className="text-[11px] text-gray-500 mt-1">
                       ยื่นเมื่อ: {new Date(a.submittedAt).toLocaleString('th-TH')}
                     </p>
                     {a.teacherResponse && (
-                      <p className="text-sm mt-1">
+                      <p className="text-sm mt-1 text-gray-700 dark:text-gray-300">
                         ครูตอบ: {a.teacherResponse} {a.restoredPoints ? `(คืน ${a.restoredPoints} คะแนน)` : ''}
                       </p>
                     )}
@@ -145,8 +145,8 @@ export const MyAppealsTab: React.FC<MyAppealsTabProps> = ({
                       a.status === 'pending'
                         ? 'bg-yellow-100 text-yellow-700'
                         : a.status === 'approved'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
                     )}
                   >
                     {a.status.toUpperCase()}

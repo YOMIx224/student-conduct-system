@@ -25,7 +25,7 @@ export const Modal: React.FC<ModalProps> = ({ title, children, onClose, large })
         >
           <X size={24} />
         </button>
-        <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 dark:text-white pr-12 sm:pr-8">{title}</h2>
+        <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-gray-800 dark:text-white pr-12 sm:pr-8">{title}</h2>
         {children}
       </div>
     </div>

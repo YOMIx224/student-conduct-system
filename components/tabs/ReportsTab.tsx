@@ -179,7 +179,7 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
               <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div className={cx(r.cls, 'h-2 rounded-full')} style={{ width: `${r.width}%` }} />
               </div>
-              <span className="font-semibold text-sm w-8 text-right">{r.count}</span>
+              <span className="font-semibold text-sm w-8 text-right text-gray-800 dark:text-white">{r.count}</span>
             </div>
           </div>
         ))}
@@ -190,7 +190,7 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">รายงานและสถิติ</h2>
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">รายงานและสถิติ</h2>
         <div className="relative">
           <button
             onClick={() => setShowExportMenu(!showExportMenu)}
@@ -228,7 +228,7 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={cx('rounded-xl shadow-md p-6', darkMode ? 'bg-gray-800' : 'bg-white')}>
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-white">
             <BarChart3 size={20} className="text-indigo-500" />
             สถิติการกระทำผิดตามประเภท
           </h3>
@@ -249,7 +249,7 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
         </div>
 
         <div className={cx('rounded-xl shadow-md p-6', darkMode ? 'bg-gray-800' : 'bg-white')}>
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-white">
             <AlertCircle size={20} className="text-red-500" />
             นักเรียนที่มีคะแนนต่ำกว่า 70
           </h3>
@@ -263,7 +263,7 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
                 .map((s) => (
                   <div key={s.studentId} className="flex justify-between items-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                     <div>
-                      <p className="font-semibold">{s.name}</p>
+                      <p className="font-semibold text-gray-800 dark:text-white">{s.name}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         {s.studentId} - {s.class}
                       </p>
@@ -276,7 +276,7 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
         </div>
 
         <div className={cx('rounded-xl shadow-md p-6', darkMode ? 'bg-gray-800' : 'bg-white')}>
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-white">
             <Award size={20} className="text-green-500" />
             การกระจายคะแนน
           </h3>

@@ -20,7 +20,7 @@ export const MyScoreTab: React.FC<MyScoreTabProps> = ({ darkMode, student, viola
   return (
     <div className="space-y-6">
       <div className={cx('rounded-xl shadow-md p-6', darkMode ? 'bg-gray-800' : 'bg-white')}>
-        <h2 className="text-xl font-semibold mb-4">คะแนนของฉัน</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">คะแนนของฉัน</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <MiniStat label="คะแนนปัจจุบัน" value={student.conductScore} />
           <MiniStat label="หักสะสม" value={`-${totalMinus}`} />
@@ -29,7 +29,7 @@ export const MyScoreTab: React.FC<MyScoreTabProps> = ({ darkMode, student, viola
       </div>
 
       <div className={cx('rounded-xl shadow-md p-6', darkMode ? 'bg-gray-800' : 'bg-white')}>
-        <h3 className="text-lg font-semibold mb-4">รายการที่ถูกหักคะแนน</h3>
+        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">รายการที่ถูกหักคะแนน</h3>
         <div className="space-y-3">
           {violations.length === 0 ? (
             <p className="text-gray-500">ยังไม่มีรายการ</p>
@@ -44,7 +44,7 @@ export const MyScoreTab: React.FC<MyScoreTabProps> = ({ darkMode, student, viola
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-medium">{v.violationType}</p>
+                    <p className="font-medium text-gray-800 dark:text-white">{v.violationType}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{v.description}</p>
                     <div className="flex gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
                       <span className="flex items-center gap-1">
