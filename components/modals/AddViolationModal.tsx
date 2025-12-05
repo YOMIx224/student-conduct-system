@@ -3,15 +3,16 @@ import { Modal } from './Modal';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
-import type { Student, Violation } from '@/types';
+import type { Student, Violation, UserAccount } from '@/types';
 
 interface AddViolationModalProps {
   students: Student[];
   onClose: () => void;
-  onAdd: (violation: Omit<Violation, 'id' | 'studentName' | 'appeals'>) => void;
+  onAdd: (violation: Omit<Violation, 'id' | 'studentName' | 'appeals' | 'recordedBy'> & { recordedBy: string }) => void;
+  currentUser: UserAccount | null;
 }
 
-export const AddViolationModal: React.FC<AddViolationModalProps> = ({ students, onClose, onAdd }) => {
+export const AddViolationModal: React.FC<AddViolationModalProps> = ({ students, onClose, onAdd, currentUser }) => {
   const [formData, setFormData] = useState({
     studentId: '',
     violationType: '',
@@ -20,7 +21,6 @@ export const AddViolationModal: React.FC<AddViolationModalProps> = ({ students, 
     location: '',
     date: new Date().toISOString().split('T')[0],
     time: new Date().toTimeString().split(' ')[0].slice(0, 5),
-    recordedBy: ''
   });
 
   const violationTypes = [
@@ -50,20 +50,21 @@ export const AddViolationModal: React.FC<AddViolationModalProps> = ({ students, 
       return;
     }
 
-    if (!formData.recordedBy) {
-      alert('กรุณากรอกชื่อครูที่บันทึก');
-      return;
-    }
-
     const pts = parseInt(formData.pointsDeducted);
     if (!Number.isFinite(pts) || pts <= 0) {
       alert('คะแนนไม่ถูกต้อง');
       return;
     }
 
+    if (!currentUser?.name) {
+        alert('ไม่พบชื่อผู้บันทึก กรุณาลองเข้าสู่ระบบอีกครั้ง');
+        return;
+    }
+
     onAdd({
       ...formData,
-      pointsDeducted: pts
+      pointsDeducted: pts,
+      recordedBy: currentUser.name,
     });
   };
 
@@ -117,11 +118,7 @@ export const AddViolationModal: React.FC<AddViolationModalProps> = ({ students, 
           onChange={v => setFormData({ ...formData, location: v })}
         />
 
-        <Input
-          label="บันทึกโดย (ครูที่ปรึกษา) *"
-          value={formData.recordedBy}
-          onChange={v => setFormData({ ...formData, recordedBy: v })}
-        />
+
 
         <button
           onClick={handleSubmit}

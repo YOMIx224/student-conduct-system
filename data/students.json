@@ -1,22 +1,11 @@
 [
   {
-    "id": "1764245775762",
-    "conductScore": 100,
-    "studentId": "001",
-    "name": "test1",
-    "class": "",
+    "studentId": "66010001",
+    "name": "ตัวอย่าง นักเรียน",
+    "class": "ปวส.1/1",
     "department": "เทคโนโลยีสารสนเทศ",
-    "phone": "",
-    "email": ""
-  },
-  {
-    "id": "1764245785594",
-    "conductScore": 100,
-    "studentId": "002",
-    "name": "test2",
-    "class": "",
-    "department": "เทคโนโลยีสารสนเทศ",
-    "phone": "",
-    "email": ""
+    "phone": "0812345678",
+    "email": "example@student.ac.th",
+    "conductScore": 100
   }
 ]

@@ -23,11 +23,15 @@ async function writeData(data: Student[]): Promise<void> {
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   const body = await request.json();
-  const { studentId, name, class: studentClass, department, phone, email } = body;
+  const { role, studentId, name, class: studentClass, department, phone, email } = body;
+
+  if (role !== 'admin') {
+    return NextResponse.json({ message: 'Forbidden: Only admin can update students' }, { status: 403 });
+  }
 
   if (!studentId || !name) {
     return NextResponse.json({ message: 'Student ID and name are required' }, { status: 400 });
@@ -58,11 +62,15 @@ export async function PUT(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   const body = await request.json();
-  const { conductScore } = body;
+  const { role, conductScore } = body;
+
+  if (role !== 'admin' && role !== 'teacher') {
+    return NextResponse.json({ message: 'Forbidden: Only admin and teachers can update student scores' }, { status: 403 });
+  }
 
   if (typeof conductScore !== 'number') {
     return NextResponse.json({ message: 'Invalid conduct score' }, { status: 400 });
@@ -83,9 +91,15 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
+  const { role } = await request.json();
+
+  if (role !== 'admin') {
+    return NextResponse.json({ message: 'Forbidden: Only admin can delete students' }, { status: 403 });
+  }
+  
   const students = await readData();
   const updatedStudents = students.filter(s => s.id !== id);
 

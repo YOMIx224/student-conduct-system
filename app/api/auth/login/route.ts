@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
-import { UserAccount } from '@/types';
+import { UserAccount, Student } from '@/types';
 
-const dataFilePath = path.join(process.cwd(), 'data/users.json');
+const usersFilePath = path.join(process.cwd(), 'data/users.json');
+const studentsFilePath = path.join(process.cwd(), 'data/students.json');
 
-async function readUsers(): Promise<UserAccount[]> {
+async function readData<T>(filePath: string): Promise<T[]> {
   try {
-    const fileContent = await fs.readFile(dataFilePath, 'utf-8');
+    const fileContent = await fs.readFile(filePath, 'utf-8');
     return JSON.parse(fileContent);
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
@@ -24,19 +25,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Username and password are required' }, { status: 400 });
   }
 
-  const users = await readUsers();
+  const users = await readData<UserAccount>(usersFilePath);
+  const students = await readData<Student>(studentsFilePath);
 
-  // IMPORTANT: In a real application, passwords should be hashed and compared securely.
-  // This is a simplified example and is not secure.
-  // Check if the input matches username OR studentId
-  const user = users.find(u => (u.username === username || u.studentId === username) && u.password === password);
+  // Check for admin/teacher user
+  const user = users.find(u => u.username === username && u.password === password);
 
-  if (!user) {
-    return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+  if (user) {
+    const { password: _, ...userWithoutPassword } = user;
+    return NextResponse.json(userWithoutPassword);
   }
 
-  // Do not send the password back to the client
-  const { password: _, ...userWithoutPassword } = user;
+  // Check for student user
+  const student = students.find(s => s.studentId === username);
 
-  return NextResponse.json(userWithoutPassword);
+  if (student) {
+    // For students, the user requested to login with studentId.
+    // We will use a generic password 'student123' as mentioned in the test data.
+    if (password === 'student123') {
+      const studentUser: UserAccount = {
+        id: student.id,
+        username: student.studentId,
+        role: 'student',
+        name: student.name,
+        email: student.email,
+        studentId: student.studentId,
+      };
+      return NextResponse.json(studentUser);
+    }
+  }
+
+  return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
 }
+

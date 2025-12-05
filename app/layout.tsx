@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'ระบบตัดคะแนนพฤติกรรมนักเรียน-นักศึกษา',
-  description: 'ระบบตัดคะแนนพฤติกรรมนักเรียน-นักศึกษา แผนกวิชาเทคโนโลยีสารสนเทศ วิทยาลัยเทคนิคสิงห์บุรี',
+  title: 'ระบบตัดคะแนนความประพฤตินักเรียน-นักศึกษา | วิทยาลัยเทคนิคสิงห์บุรี',
+  description: 'ระบบบริหารจัดการคะแนนความประพฤติของนักเรียน-นักศึกษา แผนกวิชาเทคโนโลยีสารสนเทศ วิทยาลัยเทคนิคสิงห์บุรี',
 };
 
 export default function RootLayout({
@@ -13,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="th">
-      <body className="antialiased">{children}</body>
+    <html lang="th" suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>{children}</body>
     </html>
   );
 }

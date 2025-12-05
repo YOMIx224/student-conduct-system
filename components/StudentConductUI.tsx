@@ -12,13 +12,13 @@ import { cx, formatThaiDate } from '@/utils/helpers';
 
 // Import components
 import { LoginScreen } from '@/components/auth/LoginScreen';
-import { RegisterScreen } from '@/components/auth/RegisterScreen';
 import { Dashboard } from '@/components/tabs/Dashboard';
 import { StudentsTab } from '@/components/tabs/StudentsTab';
 import { ViolationsTab } from '@/components/tabs/ViolationsTab';
 import { ReportsTab } from '@/components/tabs/ReportsTab';
 import { MyScoreTab } from '@/components/tabs/MyScoreTab';
 import { MyAppealsTab } from '@/components/tabs/MyAppealsTab';
+import { ProfileTab } from '@/components/tabs/ProfileTab';
 import { AddStudentModal } from '@/components/modals/AddStudentModal';
 import { EditStudentModal } from '@/components/modals/EditStudentModal';
 import { EditViolationModal } from '@/components/modals/EditViolationModal';
@@ -27,9 +27,10 @@ import { Header } from '@/components/layout/Header';
 import { Modal } from '@/components/modals/Modal';
 import { Input } from '@/components/ui/Input';
 import { TabButton } from '@/components/ui/TabButton';
+import { CLASS_LIST } from '@/utils/classList';
 
 export default function StudentConductUI() {
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
 
@@ -37,7 +38,7 @@ export default function StudentConductUI() {
   const [violations, setViolations] = useState<Violation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'violations' | 'reports' | 'myScore' | 'myAppeals'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'violations' | 'reports' | 'myScore' | 'myAppeals' | 'profile'>('dashboard');
 
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [showAddViolation, setShowAddViolation] = useState(false);
@@ -113,78 +114,9 @@ export default function StudentConductUI() {
   const handleLogout = () => {
     setCurrentUser(null);
     setIsLoggedIn(false);
-    setAuthMode('login');
   };
 
-  const handleRegister = async (payload: {
-    username: string; password: string; role: Role; name: string; email: string;
-    studentId?: string; class?: string; department?: string;
-  }) => {
-    try {
-      const userPayload: UserAccount = {
-        username: payload.username,
-        password: payload.password,
-        role: payload.role,
-        name: payload.name,
-        email: payload.email,
-        studentId: payload.role === 'student' ? payload.studentId : undefined
-      };
-
-      const userResponse = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userPayload),
-      });
-
-      if (!userResponse.ok) {
-        const errorData = await userResponse.json();
-        alert(errorData.message || 'User registration failed');
-        return false;
-      }
-    } catch (error) {
-      console.error(error);
-      alert('An error occurred during user registration.');
-      return false;
-    }
-
-    if (payload.role === 'student') {
-      if (!payload.studentId || !payload.name) {
-        alert('นักเรียนต้องใส่ Student ID และชื่อ-นามสกุล');
-        return false;
-      }
-
-      const exists = students.some(s => s.studentId === payload.studentId);
-      if (!exists) {
-        const newStu: Omit<Student, 'id' | 'conductScore'> = {
-          studentId: payload.studentId!,
-          name: payload.name,
-          class: payload.class || 'ไม่ระบุ',
-          department: payload.department || 'เทคโนโลยีสารสนเทศ',
-          email: payload.email
-        };
-
-        try {
-          const studentResponse = await fetch('/api/students', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newStu),
-          });
-          if (!studentResponse.ok) throw new Error('Failed to create student record');
-          await fetchStudents();
-        } catch (error) {
-          console.error(error);
-          alert('เกิดข้อผิดพลาดในการสร้างข้อมูลนักเรียน');
-          return false;
-        }
-      }
-    }
-
-    alert('สมัครสมาชิกสำเร็จ! ลองเข้าสู่ระบบได้เลย');
-    setAuthMode('login');
-    return true;
-  };
-
-  const classes = useMemo(() => Array.from(new Set(students.map(s => s.class))), [students]);
+  const classes = CLASS_LIST;
 
   const filteredStudents = useMemo(() => {
     return students
@@ -217,21 +149,26 @@ export default function StudentConductUI() {
   }), [students, violations]);
 
   const handleAddStudent = async (studentData: Omit<Student, 'id' | 'conductScore'>) => {
+    if (!currentUser || currentUser.role !== 'admin') {
+      alert('Forbidden: Only admin can add students');
+      return;
+    }
     try {
       const response = await fetch('/api/students', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(studentData),
+        body: JSON.stringify({ ...studentData, role: currentUser.role }),
       });
       if (!response.ok) throw new Error('Failed to add student');
       setShowAddStudent(false);
       fetchStudents();
     } catch (error) {
       console.error(error);
+      alert('An error occurred while adding student.');
     }
   };
 
-  const handleAddViolation = async (violationData: Omit<Violation, 'id' | 'studentName' | 'appeals'>) => {
+  const handleAddViolation = async (violationData: Omit<Violation, 'id' | 'studentName' | 'appeals'> & { recordedBy: string }) => {
     const student = students.find(s => s.studentId === violationData.studentId);
     if (!student) {
       alert('ไม่พบนักเรียน');
@@ -254,7 +191,7 @@ export default function StudentConductUI() {
       const scoreResponse = await fetch(`/api/students/${student.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conductScore: newScore }),
+        body: JSON.stringify({ conductScore: newScore, role: currentUser?.role }),
       });
       if (!scoreResponse.ok) throw new Error("Failed to update student's score");
 
@@ -268,29 +205,50 @@ export default function StudentConductUI() {
   };
 
   const handleEditStudent = async (id: string, studentData: Partial<Student>) => {
+    if (!currentUser || currentUser.role !== 'admin') {
+      alert('Forbidden: Only admin can edit students');
+      return;
+    }
     try {
       const response = await fetch(`/api/students/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(studentData),
+        body: JSON.stringify({ ...studentData, role: currentUser.role }),
       });
-      if (!response.ok) throw new Error('Failed to update student');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update student');
+      }
       setEditingStudent(null);
       fetchStudents();
-    } catch (error) {
+      alert('แก้ไขข้อมูลนักเรียนสำเร็จ');
+    } catch (error: any) {
       console.error(error);
-      alert('เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
+      alert(error.message || 'เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
     }
   };
 
   const handleDeleteStudent = async (id: string) => {
+    if (!currentUser || currentUser.role !== 'admin') {
+      alert('Forbidden: Only admin can delete students');
+      return;
+    }
     if (!window.confirm('Are you sure you want to delete this student?')) return;
     try {
-      const response = await fetch(`/api/students/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete student');
+      const response = await fetch(`/api/students/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: currentUser.role }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete student');
+      }
       fetchStudents();
-    } catch (error) {
+      alert('ลบนักเรียนสำเร็จ');
+    } catch (error: any) {
       console.error(error);
+      alert(error.message || 'เกิดข้อผิดพลาดในการลบข้อมูล');
     }
   };
 
@@ -385,19 +343,11 @@ export default function StudentConductUI() {
   };
 
   if (!isLoggedIn) {
-    return authMode === 'login' ? (
+    return (
       <LoginScreen
         onLogin={handleLogin}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
-        onSwitchRegister={() => setAuthMode('register')}
-      />
-    ) : (
-      <RegisterScreen
-        onRegister={handleRegister}
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
-        onSwitchLogin={() => setAuthMode('login')}
       />
     );
   }
@@ -414,27 +364,29 @@ export default function StudentConductUI() {
         handleLogout={handleLogout}
       />
 
-      <nav className="bg-white dark:bg-gray-800 shadow-sm overflow-x-auto">
+      <nav className="glass shadow-sm overflow-x-auto border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center space-x-1 sm:space-x-4 min-w-max">
+          <div className="flex items-center space-x-1 sm:space-x-2 min-w-max">
             {currentUser?.role !== 'student' ? (
               <>
-                <TabButton name="dashboard" activeTab={activeTab} setActiveTab={setActiveTab}>Dashboard</TabButton>
-                <TabButton name="students" activeTab={activeTab} setActiveTab={setActiveTab}>Students</TabButton>
-                <TabButton name="violations" activeTab={activeTab} setActiveTab={setActiveTab}>Violations</TabButton>
-                <TabButton name="reports" activeTab={activeTab} setActiveTab={setActiveTab}>Reports</TabButton>
+                <TabButton name="dashboard" activeTab={activeTab} setActiveTab={setActiveTab}>ประกาศ</TabButton>
+                <TabButton name="students" activeTab={activeTab} setActiveTab={setActiveTab}>นักเรียน</TabButton>
+                <TabButton name="violations" activeTab={activeTab} setActiveTab={setActiveTab}>บันทึกการกระทำผิด</TabButton>
+                <TabButton name="reports" activeTab={activeTab} setActiveTab={setActiveTab}>รายงาน</TabButton>
+                <TabButton name="profile" activeTab={activeTab} setActiveTab={setActiveTab}>โปรไฟล์</TabButton>
               </>
             ) : (
               <>
-                <TabButton name="myScore" activeTab={activeTab} setActiveTab={setActiveTab}>My Score</TabButton>
-                <TabButton name="myAppeals" activeTab={activeTab} setActiveTab={setActiveTab}>My Appeals</TabButton>
+                <TabButton name="myScore" activeTab={activeTab} setActiveTab={setActiveTab}>คะแนนของฉัน</TabButton>
+                <TabButton name="myAppeals" activeTab={activeTab} setActiveTab={setActiveTab}>ส่งคำขอแก้คะแนน</TabButton>
+                <TabButton name="profile" activeTab={activeTab} setActiveTab={setActiveTab}>โปรไฟล์</TabButton>
               </>
             )}
           </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 animate-fade-in">
         {activeTab === 'dashboard' && currentUser?.role !== 'student' && (
           <Dashboard darkMode={darkMode} stats={stats} />
         )}
@@ -489,6 +441,27 @@ export default function StudentConductUI() {
             onSubmit={handleSubmitAppeal}
           />
         )}
+        {activeTab === 'profile' && (
+          <ProfileTab
+            darkMode={darkMode}
+            currentUser={currentUser}
+            onUpdateProfile={async (updates) => {
+              try {
+                const response = await fetch('/api/profile', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ ...updates, username: currentUser?.username }),
+                });
+                if (!response.ok) throw new Error('Failed to update profile');
+                const updated = await response.json();
+                setCurrentUser(updated);
+              } catch (error) {
+                console.error(error);
+                throw error;
+              }
+            }}
+          />
+        )}
       </div>
 
       {showAddStudent && (
@@ -502,6 +475,7 @@ export default function StudentConductUI() {
           students={students}
           onClose={() => setShowAddViolation(false)}
           onAdd={handleAddViolation}
+          currentUser={currentUser}
         />
       )}
       {editingViolation && (

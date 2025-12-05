@@ -46,4 +46,7 @@ export interface UserAccount {
   name: string;
   email: string;
   studentId?: string;
+  phone?: string;
+  bio?: string;
+  avatar?: string;
 }

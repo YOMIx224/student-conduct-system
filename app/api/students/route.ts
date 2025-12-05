@@ -29,7 +29,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const students = await readData();
-  const newStudentData: Omit<Student, 'id' | 'conductScore'> = await request.json();
+  const { role, ...newStudentData }: { role: string } & Omit<Student, 'id' | 'conductScore'> = await request.json();
+
+  if (role !== 'admin') {
+    return NextResponse.json({ message: 'Forbidden: Only admin can add students' }, { status: 403 });
+  }
 
   const studentWithId: Student = {
     id: Date.now().toString(),

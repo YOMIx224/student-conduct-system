@@ -4,7 +4,7 @@ import { cx } from '@/utils/helpers';
 import type { Student, Violation } from '@/types';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Document, Packer, Paragraph, Table as DocxTable, TableRow, TableCell, WidthType, TextRun, AlignmentType, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, Table as DocxTable, TableRow, TableCell, WidthType, TextRun, AlignmentType } from 'docx';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 
@@ -122,11 +122,6 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
 
   const handleExportPDF = () => {
     const doc = new jsPDF();
-
-    // Note: Standard fonts in jsPDF do not support Thai characters well.
-    // In a production environment, you should load a custom Thai font (e.g., Sarabun)
-    // using doc.addFileToVFS and doc.addFont.
-    // For this demo, we will proceed, but Thai characters might appear as squares if the font is not supported.
 
     doc.setFontSize(18);
     doc.text('Student Conduct Report', 14, 22);
@@ -266,7 +261,7 @@ export const ReportsTab: React.FC<ReportsTabProps> = ({
                 .filter((s) => s.conductScore < 70)
                 .sort((a, b) => a.conductScore - b.conductScore)
                 .map((s) => (
-                  <div key={s.id} className="flex justify-between items-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                  <div key={s.studentId} className="flex justify-between items-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                     <div>
                       <p className="font-semibold">{s.name}</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
